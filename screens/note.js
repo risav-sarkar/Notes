@@ -17,15 +17,8 @@ import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
 import { faEdit } from "@fortawesome/free-solid-svg-icons/faEdit";
 
 import { useEffect, useState } from "react";
-import {
-  collection,
-  getDocs,
-  doc,
-  onSnapshot,
-  updateDoc,
-  getFirestore,
-  deleteDoc,
-} from "firebase/firestore";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+
 import { database } from "../firebaseConfig";
 import { useUserFetch } from "../hooks/useUserFetch";
 import NoteContent from "../src/noteContent";
@@ -39,8 +32,12 @@ const Note = ({ route, navigation }) => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+
   const [noteData, setNoteData] = useState("");
-  const [editingIndex, setEditingIndex] = useState(-1);
+  const [editingID, setEditingID] = useState(null);
+
+  const [data1, setData1] = useState([]);
+  const [data2, setData2] = useState([]);
 
   useEffect(() => {
     setNoteData(route.params);
@@ -50,9 +47,26 @@ const Note = ({ route, navigation }) => {
     if (noteData) {
       let temp = data.filter((e) => e.id === noteData.id);
       temp[0].uid = noteData.uid;
+      console.log(temp[0]);
       setNoteData(temp[0]);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (noteData.notes) {
+      console.log("Data Filtered");
+      let arr1 = [],
+        arr2 = [];
+      for (let i = 0; i < noteData.notes.length; i++) {
+        if (i % 2 === 0) {
+          arr1.push(noteData.notes[i]);
+        } else arr2.push(noteData.notes[i]);
+      }
+
+      setData1([...arr1]);
+      setData2([...arr2]);
+    }
+  }, [noteData]);
 
   const HandleSubmit = () => {
     const docToUpdate = doc(database, noteData.uid, noteData.id);
@@ -75,28 +89,44 @@ const Note = ({ route, navigation }) => {
   const HandleEdit = () => {
     const docToUpdate = doc(database, noteData.uid, noteData.id);
     let arr = noteData.notes;
-    let obj = { title, content, id: noteData.id + editingIndex };
-    arr[editingIndex] = obj;
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].id === editingID) {
+        let obj = { title, content, id: arr[i].id };
+        arr[i] = obj;
+        break;
+      }
+    }
+
     updateDoc(docToUpdate, {
       notes: [...arr],
     });
     setModal(false);
     setTitle("");
     setContent("");
-    setEditingIndex(-1);
+    setEditingID(null);
   };
 
   const HandleDelete = () => {
     const docToUpdate = doc(database, noteData.uid, noteData.id);
     let arr = noteData.notes;
-    arr.splice(editingIndex, 1);
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].id === editingID) {
+        arr.splice(i, 1);
+        break;
+      }
+    }
+    for (let i = 0; i < arr.length; i++) {
+      let obj = arr[i];
+      obj.id = noteData.id + i;
+      arr[i] = obj;
+    }
     updateDoc(docToUpdate, {
       notes: [...arr],
     });
     setModal(false);
     setTitle("");
     setContent("");
-    setEditingIndex(-1);
+    setEditingID(null);
   };
 
   const HandleDeleteDoc = () => {
@@ -185,28 +215,50 @@ const Note = ({ route, navigation }) => {
       ) : null}
 
       {noteData.notes ? (
-        <FlatList
-          style={styles.flatListStyle}
-          data={noteData.notes}
-          numColumns={2}
-          renderItem={(e) => {
-            return (
-              <NoteContent
-                data={e.item}
-                editFunc={() => {
-                  setModal(true);
-                  setEditingIndex(e.index);
-                  setTitle(e.item.title);
-                  setContent(e.item.content);
-                }}
-              />
-            );
-          }}
-          keyExtractor={(item) => {
-            item.id;
-          }}
-          showsHorizontalScrollIndicator={false}
-        />
+        <View style={{ flexDirection: "row", paddingLeft: 15 }}>
+          <FlatList
+            style={styles.flatListStyle}
+            data={data1}
+            renderItem={(e) => {
+              return (
+                <NoteContent
+                  data={e.item}
+                  editFunc={() => {
+                    setModal(true);
+                    setEditingID(e.item.id);
+                    setTitle(e.item.title);
+                    setContent(e.item.content);
+                  }}
+                />
+              );
+            }}
+            keyExtractor={(item) => {
+              item.id;
+            }}
+            showsHorizontalScrollIndicator={false}
+          />
+          <FlatList
+            style={styles.flatListStyle}
+            data={data2}
+            renderItem={(e) => {
+              return (
+                <NoteContent
+                  data={e.item}
+                  editFunc={() => {
+                    setModal(true);
+                    setEditingID(e.item.id);
+                    setTitle(e.item.title);
+                    setContent(e.item.content);
+                  }}
+                />
+              );
+            }}
+            keyExtractor={(item) => {
+              item.id;
+            }}
+            showsHorizontalScrollIndicator={false}
+          />
+        </View>
       ) : (
         <View style={styles.emptyText}>
           <Text style={styles.emptyTextStyle}>Create A Note By</Text>
@@ -241,7 +293,7 @@ const Note = ({ route, navigation }) => {
                 setModal(false);
                 setTitle("");
                 setContent("");
-                setEditingIndex(-1);
+                setEditingID(null);
               }}
             >
               <FontAwesomeIcon size={40} icon={faXmark} color={"#fff"} />
@@ -249,7 +301,7 @@ const Note = ({ route, navigation }) => {
             <TouchableOpacity
               style={styles.modalBtn}
               onPress={() => {
-                if (editingIndex === -1) HandleSubmit();
+                if (editingID === null) HandleSubmit();
                 else {
                   HandleEdit();
                 }
@@ -287,7 +339,7 @@ const Note = ({ route, navigation }) => {
             />
           </View>
 
-          {editingIndex !== -1 ? (
+          {editingID !== null ? (
             <TouchableOpacity
               style={styles.deleteBtn}
               onPress={() => {
@@ -380,7 +432,6 @@ const styles = StyleSheet.create({
   flatListStyle: {
     marginTop: 20,
     width: "100%",
-    paddingLeft: 15,
     paddingBottom: 120,
   },
   emptyText: {
