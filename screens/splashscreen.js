@@ -3,7 +3,7 @@ import { Text, StyleSheet, View } from "react-native";
 const SplashScreen = () => {
   return (
     <View style={styles.splashScreen}>
-      <Text>Hi</Text>
+      <Text style={{ color: "#fff", fontSize: 30 }}>Notes</Text>
     </View>
   );
 };
@@ -11,7 +11,7 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
   splashScreen: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#0b0f13",
     justifyContent: "center",
     alignItems: "center",
   },

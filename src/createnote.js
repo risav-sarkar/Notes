@@ -12,10 +12,22 @@ import { collection, addDoc } from "firebase/firestore";
 import { database } from "../firebaseConfig";
 
 const CreateNote = ({ uid }) => {
-  const [term, setTerm] = useState(null);
+  const [term, setTerm] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const SetAlert = (e) => {
+    setAlertMessage(e);
+    const timer = setTimeout(() => {
+      setAlertMessage("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  };
 
   const HandleSubmit = () => {
-    if (!term) return;
+    if (!term) {
+      SetAlert("Name Can Not Be Blank!");
+      return;
+    }
     const d = new Date();
     let date = d.getTime();
     const collectionRef = collection(database, uid);
@@ -34,7 +46,7 @@ const CreateNote = ({ uid }) => {
           placeholder="Create A Notes Folder"
           value={term}
           onChangeText={setTerm}
-          placeholderTextColor={"grey"}
+          placeholderTextColor={"#aaaaaa"}
           maxLength={15}
         />
         <TouchableOpacity
@@ -44,6 +56,11 @@ const CreateNote = ({ uid }) => {
           <FontAwesomeIcon size={28} icon={faPaperPlane} color={"#000000"} />
         </TouchableOpacity>
       </View>
+      {alertMessage ? (
+        <View style={styles.alertBox}>
+          <Text style={{ color: "#ed6d65", fontSize: 18 }}>{alertMessage}</Text>
+        </View>
+      ) : null}
     </>
   );
 };
@@ -77,6 +94,14 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     fontSize: 18,
     flex: 1,
+  },
+  alertBox: {
+    backgroundColor: "#3d1515",
+    marginHorizontal: 15,
+    padding: 15,
+    borderRadius: 20,
+    alignItems: "center",
+    marginTop: 15,
   },
 });
 

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Text,
   StyleSheet,
@@ -7,22 +8,13 @@ import {
   Image,
   StatusBar,
 } from "react-native";
-import { useEffect, useState } from "react";
-import { firebaseApp } from "../firebaseConfig";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
-} from "firebase/auth";
 
-const Login = ({ navigation }) => {
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+
+const PasswordReset = ({ navigation }) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
-
-  const auth = getAuth();
-  const providerGoogle = new GoogleAuthProvider();
+  const [success, setSuccess] = useState(false);
 
   const SetAlert = (e) => {
     setAlertMessage(e);
@@ -32,47 +24,36 @@ const Login = ({ navigation }) => {
     return () => clearTimeout(timer);
   };
 
-  const HandleSubmit = () => {
+  const ResetEmail = () => {
+    setSuccess(false);
     if (!email) {
       SetAlert("Enter Your Email!");
       return;
-    } else if (!password) {
-      SetAlert("Enter Your Password!");
-      return;
     }
-
-    signInWithEmailAndPassword(auth, email, password)
+    const auth = getAuth();
+    sendPasswordResetEmail(auth, email)
       .then((res) => {
-        console.log(res.user);
+        setSuccess(true);
+        setAlertMessage("");
       })
       .catch((error) => {
         console.log(error.message);
-        if (error.message === "Firebase: Error (auth/invalid-email).") {
-          SetAlert("Please Enter Valid Email!");
-        } else if (error.message === "Firebase: Error (auth/wrong-password).") {
-          SetAlert("Password Is Wrong!");
-        } else if (error.message === "Firebase: Error (auth/user-not-found).") {
+        if (error.message === "Firebase: Error (auth/user-not-found).") {
           SetAlert("User Not Found!");
+        } else if (error.message === "Firebase: Error (auth/invalid-email).") {
+          SetAlert("Please Enter Valid Email!");
         }
       });
-  };
-
-  const HandleGoogleLogin = () => {
-    // signInWithPopup(auth, providerGoogle)
-    //   .then((res) => {
-    //     console.log(res.user);
-    //   })
-    //   .catch((error) => {
-    //     alert(error.message);
-    //   });
   };
 
   return (
     <View style={styles.containerStyle}>
       <StatusBar animated={false} backgroundColor="#0b0f13" />
       <View style={styles.loginHeader}>
-        <Text style={styles.mainHeader}>Sign In</Text>
-        <Text style={styles.subHeader}>Please Sign In To Your Account</Text>
+        <Text style={styles.mainHeader}>Reset Password?</Text>
+        <Text style={styles.subHeader}>
+          Enter Your Registered Email To Receive Password Reset Instruction
+        </Text>
       </View>
 
       <View style={{ justifyContent: "center", flex: 1 }}>
@@ -86,15 +67,6 @@ const Login = ({ navigation }) => {
             onChangeText={setEmail}
             placeholderTextColor={"#aaaaaa"}
           />
-          <TextInput
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={styles.inputStyle}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            placeholderTextColor={"#aaaaaa"}
-          />
 
           {alertMessage ? (
             <View style={styles.alertBox}>
@@ -104,60 +76,22 @@ const Login = ({ navigation }) => {
             </View>
           ) : null}
 
-          <View
-            style={{
-              alignItems: "space-between",
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("PasswordReset");
-              }}
-            >
-              <Text
-                style={{
-                  paddingHorizontal: 20,
-                  color: "#aaaaaa",
-                  paddingBottom: 15,
-                }}
-              >
-                Forgot Password?
+          {success ? (
+            <View style={styles.successBox}>
+              <Text style={{ color: "#65d372", fontSize: 18 }}>
+                Check Your Inbox For Email!
               </Text>
-            </TouchableOpacity>
-          </View>
-
+            </View>
+          ) : null}
           <TouchableOpacity
             onPress={() => {
-              HandleSubmit();
+              ResetEmail();
             }}
             style={styles.loginbtn}
           >
             <Text style={{ fontSize: 16, color: "#eaeaea", letterSpacing: 1 }}>
-              Sign In
+              Send
             </Text>
-          </TouchableOpacity>
-
-          <Text
-            style={{
-              textAlign: "center",
-              marginVertical: 10,
-              color: "#eaeaea",
-            }}
-          >
-            or
-          </Text>
-
-          <TouchableOpacity
-            onPress={() => {
-              HandleGoogleLogin();
-            }}
-            style={styles.googleBtn}
-          >
-            <Image
-              style={styles.googleLogo}
-              source={require("../assets/googleLogo.png")}
-            />
-            <Text style={{ fontSize: 16 }}>Sign In With Google</Text>
           </TouchableOpacity>
 
           <View
@@ -169,11 +103,11 @@ const Login = ({ navigation }) => {
             }}
           >
             <Text style={{ color: "#eaeaea", fontSize: 16 }}>
-              Don't Have An Account?{" "}
+              Remembered Password?{" "}
             </Text>
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate("Register");
+                navigation.navigate("Login");
               }}
             >
               <Text
@@ -183,7 +117,7 @@ const Login = ({ navigation }) => {
                   padding: 10,
                 }}
               >
-                Sign Up
+                Sign In
               </Text>
             </TouchableOpacity>
           </View>
@@ -202,7 +136,12 @@ const styles = StyleSheet.create({
   },
   loginHeader: { alignItems: "center", marginVertical: 80 },
   mainHeader: { color: "#fff", marginBottom: 15, fontSize: 34 },
-  subHeader: { color: "#aaaaaa", fontSize: 14 },
+  subHeader: {
+    color: "#aaaaaa",
+    fontSize: 14,
+    width: 250,
+    textAlign: "center",
+  },
   inputStyle: {
     marginHorizontal: 15,
     borderWidth: 2,
@@ -223,20 +162,6 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
   },
-  googleBtn: {
-    marginHorizontal: 15,
-    backgroundColor: "#dbdbdb",
-    borderRadius: 20,
-    padding: 15,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  googleLogo: {
-    height: 30,
-    width: 30,
-    marginRight: 10,
-  },
   alertBox: {
     backgroundColor: "#3d1515",
     marginHorizontal: 15,
@@ -245,6 +170,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
   },
+  successBox: {
+    backgroundColor: "#1a2b20",
+    marginHorizontal: 15,
+    marginBottom: 15,
+    padding: 15,
+    borderRadius: 20,
+    alignItems: "center",
+  },
 });
 
-export default Login;
+export default PasswordReset;

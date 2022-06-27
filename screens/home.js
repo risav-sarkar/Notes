@@ -1,9 +1,11 @@
-import { Text, StyleSheet, View, StatusBar } from "react-native";
-import { FlatList, ScrollView } from "react-native-gesture-handler";
-import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, onSnapshot } from "firebase/firestore";
-import { firebaseApp, database } from "../firebaseConfig";
+import {
+  Text,
+  StyleSheet,
+  View,
+  StatusBar,
+  FlatList,
+  ScrollView,
+} from "react-native";
 
 import { useUserFetch } from "../hooks/useUserFetch";
 
@@ -16,20 +18,32 @@ const Home = ({ navigation }) => {
   return (
     <View style={styles.homeStyle}>
       <StatusBar animated={false} backgroundColor="#0b0f13" />
-      <Text style={styles.titleBar}>Notes</Text>
+      <Text style={styles.titleBar}>Hi {user.displayName}!</Text>
       <CreateNote uid={user.uid} />
-      <FlatList
-        style={styles.flatListStyle}
-        data={data}
-        renderItem={(e) => {
-          return (
-            <NoteButton navigation={navigation} data={e.item} uid={user.uid} />
-          );
-        }}
-        keyExtractor={(item) => item.id}
-        showsHorizontalScrollIndicator={false}
-        numColumns={2}
-      />
+
+      {!data.length ? (
+        <View style={styles.emptyText}>
+          <Text style={styles.emptyTextStyle}>Create A Note...</Text>
+          <Text style={styles.emptyTextStyle}>Things Looks Empty Here!</Text>
+        </View>
+      ) : (
+        <FlatList
+          style={styles.flatListStyle}
+          data={data}
+          renderItem={(e) => {
+            return (
+              <NoteButton
+                navigation={navigation}
+                data={e.item}
+                uid={user.uid}
+              />
+            );
+          }}
+          keyExtractor={(item) => item.id}
+          showsHorizontalScrollIndicator={false}
+          numColumns={2}
+        />
+      )}
     </View>
   );
 };
@@ -42,7 +56,7 @@ const styles = StyleSheet.create({
   },
   titleBar: {
     paddingHorizontal: 25,
-    fontSize: 40,
+    fontSize: 34,
     color: "#fff",
     marginBottom: 20,
   },
@@ -50,6 +64,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: "100%",
     paddingLeft: 15,
+  },
+  emptyText: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyTextStyle: {
+    color: "#aaaaaa",
+    fontSize: 20,
+    marginVertical: 6,
   },
 });
 

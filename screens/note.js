@@ -14,6 +14,7 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons/faXmark";
 import { faCheck } from "@fortawesome/free-solid-svg-icons/faCheck";
 import { faTrash } from "@fortawesome/free-solid-svg-icons/faTrash";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons/faAngleLeft";
+import { faEdit } from "@fortawesome/free-solid-svg-icons/faEdit";
 
 import { useEffect, useState } from "react";
 import {
@@ -33,6 +34,9 @@ const Note = ({ route, navigation }) => {
   const { data } = useUserFetch();
 
   const [modal, setModal] = useState(false);
+  const [titleEdit, setTitleEdit] = useState(false);
+  const [editTerm, setEditTerm] = useState("");
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [noteData, setNoteData] = useState("");
@@ -101,33 +105,82 @@ const Note = ({ route, navigation }) => {
     navigation.navigate("Home");
   };
 
+  const HandleNoteFolderEdit = () => {
+    const docToUpdate = doc(database, noteData.uid, noteData.id);
+    updateDoc(docToUpdate, {
+      name: editTerm,
+    });
+  };
+
   return (
     <View style={styles.container}>
       {noteData ? (
         <View style={styles.titleBar}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <TouchableOpacity
-              style={{ padding: 5 }}
-              onPress={() => {
-                navigation.navigate("Home");
-              }}
-            >
-              <FontAwesomeIcon size={28} icon={faAngleLeft} color={"#fff"} />
-            </TouchableOpacity>
+            {!titleEdit ? (
+              <>
+                <TouchableOpacity
+                  style={{ padding: 5 }}
+                  onPress={() => {
+                    navigation.navigate("Home");
+                  }}
+                >
+                  <FontAwesomeIcon
+                    size={28}
+                    icon={faAngleLeft}
+                    color={"#fff"}
+                  />
+                </TouchableOpacity>
 
-            <Text style={{ fontSize: 32, color: "#fff", marginLeft: 5 }}>
-              {noteData.name}
-            </Text>
+                <Text style={{ fontSize: 32, color: "#fff", marginLeft: 5 }}>
+                  {noteData.name}
+                </Text>
+              </>
+            ) : (
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={styles.editInput}
+                placeholder="Folder Name"
+                value={editTerm}
+                onChangeText={setEditTerm}
+                placeholderTextColor={"#aaaaaa"}
+                maxLength={15}
+              />
+            )}
           </View>
 
-          <TouchableOpacity
-            style={{ padding: 5 }}
-            onPress={() => {
-              HandleDeleteDoc();
-            }}
-          >
-            <FontAwesomeIcon size={24} icon={faTrash} color={"#fff"} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            {titleEdit ? (
+              <TouchableOpacity
+                style={{ padding: 5 }}
+                onPress={() => {
+                  HandleDeleteDoc();
+                }}
+              >
+                <FontAwesomeIcon size={24} icon={faTrash} color={"#fff"} />
+              </TouchableOpacity>
+            ) : null}
+
+            <TouchableOpacity
+              style={{ padding: 5, marginLeft: 10 }}
+              onPress={() => {
+                if (titleEdit) {
+                  HandleNoteFolderEdit();
+                  setTitleEdit(false);
+                } else {
+                  setEditTerm(noteData.name);
+                  setTitleEdit(true);
+                }
+              }}
+            >
+              <FontAwesomeIcon
+                size={24}
+                icon={titleEdit ? faCheck : faEdit}
+                color={"#fff"}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       ) : null}
 
@@ -154,7 +207,14 @@ const Note = ({ route, navigation }) => {
           }}
           showsHorizontalScrollIndicator={false}
         />
-      ) : null}
+      ) : (
+        <View style={styles.emptyText}>
+          <Text style={styles.emptyTextStyle}>Create A Note By</Text>
+          <Text style={styles.emptyTextStyle}>
+            Pressing The Button At The Corner!
+          </Text>
+        </View>
+      )}
 
       <TouchableOpacity
         style={styles.createBtn}
@@ -322,6 +382,28 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingLeft: 15,
     paddingBottom: 120,
+  },
+  emptyText: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyTextStyle: {
+    color: "#aaaaaa",
+    fontSize: 20,
+    marginVertical: 6,
+    paddingHorizontal: 20,
+    textAlign: "center",
+  },
+  editInput: {
+    color: "#d1d1d1",
+    fontSize: 20,
+    backgroundColor: "#14191f",
+    borderRadius: 15,
+    padding: 20,
+    borderColor: "#32373e",
+    borderWidth: 1,
+    width: 250,
   },
 });
 

@@ -10,22 +10,23 @@ const Profile = () => {
   };
 
   return (
-    <View style={styles.splashScreen}>
+    <View style={styles.container}>
       <TouchableOpacity
         onPress={() => {
           HandleSignOut();
         }}
       >
-        <Text>SignOut</Text>
+        <Text style={{ color: "#fff" }}>SignOut</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  splashScreen: {
+  container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#0b0f13",
+    paddingTop: 20,
     justifyContent: "center",
     alignItems: "center",
   },

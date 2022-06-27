@@ -13,9 +13,7 @@ import StartUp from "./screens/startup";
 import Login from "./screens/login";
 import Register from "./screens/register";
 import Note from "./screens/note";
-
-import { useEffect, useState } from "react";
-import { View } from "react-native";
+import PasswordReset from "./screens/passwordReset";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -66,6 +64,7 @@ export default function App() {
             <Stack.Screen name="StartUp" component={StartUp} />
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Register" component={Register} />
+            <Stack.Screen name="PasswordReset" component={PasswordReset} />
           </>
         ) : (
           <>

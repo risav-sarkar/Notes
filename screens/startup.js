@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
   containerStyle: {
     flex: 1,
     backgroundColor: "#0b0f13",
-    paddingTop: 60,
     justifyContent: "center",
   },
   startupScreen: {

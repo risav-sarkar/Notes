@@ -9,22 +9,53 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import { firebaseApp } from "../firebaseConfig";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  updateProfile,
+} from "firebase/auth";
 
 const Register = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
 
   const auth = getAuth();
 
+  const SetAlert = (e) => {
+    setAlertMessage(e);
+    const timer = setTimeout(() => {
+      setAlertMessage("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  };
+
   const HandleSubmit = () => {
+    if (!name) {
+      SetAlert("Enter Your Name!");
+      return;
+    } else if (!email) {
+      SetAlert("Enter Your Email!");
+      return;
+    } else if (!password) {
+      SetAlert("Enter Your Password!");
+      return;
+    } else if (!confirmPassword) {
+      SetAlert("Enter Your Password Again!");
+      return;
+    } else if (password !== confirmPassword) {
+      SetAlert("Passwords Do Not Match!");
+      return;
+    }
+
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log(user);
-        navigation.navigate("Home");
+      .then((res) => {
+        updateProfile(auth.currentUser, {
+          displayName: name,
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -45,16 +76,17 @@ const Register = ({ navigation }) => {
             autoCapitalize="none"
             autoCorrect={false}
             style={styles.inputStyle}
-            placeholder="Email"
+            placeholder="Name"
             value={name}
             onChangeText={setName}
             placeholderTextColor={"#aaaaaa"}
+            maxLength={15}
           />
           <TextInput
             autoCapitalize="none"
             autoCorrect={false}
             style={styles.inputStyle}
-            placeholder="Password"
+            placeholder="Email"
             value={email}
             onChangeText={setEmail}
             placeholderTextColor={"#aaaaaa"}
@@ -79,6 +111,14 @@ const Register = ({ navigation }) => {
             placeholderTextColor={"#aaaaaa"}
             secureTextEntry={true}
           />
+
+          {alertMessage ? (
+            <View style={styles.alertBox}>
+              <Text style={{ color: "#ed6d65", fontSize: 18 }}>
+                {alertMessage}
+              </Text>
+            </View>
+          ) : null}
 
           <TouchableOpacity
             onPress={() => {
@@ -129,9 +169,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0b0f13",
     position: "relative",
-    paddingTop: 60,
+    paddingBottom: 40,
   },
-  loginHeader: { alignItems: "center", marginTop: 20 },
+  loginHeader: { alignItems: "center", marginVertical: 80 },
   mainHeader: { color: "#fff", marginBottom: 15, fontSize: 34 },
   subHeader: { color: "#aaaaaa", fontSize: 14 },
   inputStyle: {
@@ -152,6 +192,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#214ED0",
     borderRadius: 20,
     padding: 20,
+    alignItems: "center",
+  },
+  alertBox: {
+    backgroundColor: "#3d1515",
+    marginHorizontal: 15,
+    marginBottom: 15,
+    padding: 15,
+    borderRadius: 20,
     alignItems: "center",
   },
 });
