@@ -13,12 +13,22 @@ export const useUserFetch = () => {
     }
   }, [user]);
 
-  const auth = getAuth();
-  onAuthStateChanged(auth, (u) => {
-    if (u) {
-      setUser(u);
-    } else setUser(null);
-  });
+  useEffect(() => {
+    const auth = getAuth();
+    onAuthStateChanged(auth, (u) => {
+      if (u) {
+        const timer = setTimeout(() => {
+          setUser(u);
+        }, 3000);
+        return () => clearTimeout(timer);
+      } else {
+        const timer = setTimeout(() => {
+          setUser(null);
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    });
+  }, []);
 
   const GetData = () => {
     const collectionRef = collection(database, user.uid);

@@ -1,21 +1,74 @@
-import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
-import { getAuth, signOut } from "firebase/auth";
+import {
+  Text,
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+  Modal,
+} from "react-native";
+
+import {
+  getAuth,
+  signOut,
+  updatePassword,
+  updateEmail,
+  deleteUser,
+} from "firebase/auth";
 
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons/faEnvelope";
 import { faLock } from "@fortawesome/free-solid-svg-icons/faLock";
 import { faEnvelopeCircleCheck } from "@fortawesome/free-solid-svg-icons/faEnvelopeCircleCheck";
 import { faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons/faArrowRightFromBracket";
+
 import { useUserFetch } from "../hooks/useUserFetch";
+import { useState } from "react";
 
 const Profile = () => {
   const { user } = useUserFetch();
 
+  const auth = getAuth();
+
+  const [modal, setModal] = useState(false);
+  const [inputField, setInputField] = useState("");
+  const [type, setType] = useState(null);
+
   const HandleSignOut = () => {
-    const auth = getAuth();
     signOut(auth).catch((error) => {
       console.log(error);
     });
+  };
+
+  const HandleSubmit = () => {
+    if (type === 1) {
+      updateEmail(auth.currentUser, inputField)
+        .then(() => {
+          setInputField("");
+          setModal(false);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else if (type === 2) {
+      console.log("Pass");
+      updatePassword(user, inputField)
+        .then(() => {
+          setInputField("");
+          setModal(false);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      deleteUser(user)
+        .then(() => {
+          setModal(false);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   };
 
   return (
@@ -58,6 +111,10 @@ const Profile = () => {
             styles.btnTabs,
             { borderTopLeftRadius: 15, borderTopRightRadius: 15 },
           ]}
+          onPress={() => {
+            setModal(true);
+            setType(1);
+          }}
         >
           <FontAwesomeIcon size={20} icon={faEnvelope} color={"#fff"} />
           <Text style={{ color: "#fff", fontSize: 20, marginLeft: 10 }}>
@@ -65,7 +122,13 @@ const Profile = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.btnTabs, { marginVertical: 5 }]}>
+        <TouchableOpacity
+          style={[styles.btnTabs, { marginVertical: 5 }]}
+          onPress={() => {
+            setModal(true);
+            setType(2);
+          }}
+        >
           <FontAwesomeIcon size={20} icon={faLock} color={"#fff"} />
           <Text style={{ color: "#fff", fontSize: 20, marginLeft: 10 }}>
             Change Your Password
@@ -80,6 +143,10 @@ const Profile = () => {
               borderBottomRightRadius: 15,
             },
           ]}
+          onPress={() => {
+            setModal(true);
+            setType(3);
+          }}
         >
           <FontAwesomeIcon
             size={20}
@@ -98,6 +165,82 @@ const Profile = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modal}
+        onRequestClose={() => {
+          setModal(false);
+        }}
+      >
+        <View style={styles.modal}>
+          <View style={{ flex: 1, justifyContent: "center" }}>
+            <View>
+              <View style={styles.modalheader}>
+                <Text style={{ color: "#fff", marginBottom: 15, fontSize: 34 }}>
+                  {type === 1
+                    ? "Change Email"
+                    : type === 2
+                    ? "Change Password"
+                    : "Delete Account"}
+                </Text>
+                <Text style={{ color: "#aaaaaa", fontSize: 14 }}>
+                  {type === 1
+                    ? "Enter the email you want to change to"
+                    : type === 2
+                    ? "Enter the a new password"
+                    : "This will permanently delete your account!"}
+                </Text>
+              </View>
+
+              {type !== 3 ? (
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  style={styles.inputStyle}
+                  placeholder={
+                    type === 1
+                      ? "Enter new email"
+                      : type === 2
+                      ? "Enter new password"
+                      : ""
+                  }
+                  value={inputField}
+                  onChangeText={setInputField}
+                  placeholderTextColor={"#aaaaaa"}
+                  multiline
+                />
+              ) : null}
+            </View>
+
+            <TouchableOpacity
+              onPress={() => {
+                HandleSubmit();
+              }}
+              style={type === 3 ? styles.deletebtn : styles.btn}
+            >
+              <Text style={{ fontSize: 18, color: "#fff", letterSpacing: 1 }}>
+                Confirm
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                setModal(false);
+                setInputField("");
+              }}
+              style={styles.closeBtn}
+            >
+              <Text
+                style={{ fontSize: 16, color: "#eaeaea", letterSpacing: 1 }}
+              >
+                Close
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -142,6 +285,45 @@ const styles = StyleSheet.create({
     backgroundColor: "#14191f",
     flexDirection: "row",
     alignItems: "center",
+  },
+  modal: {
+    padding: 20,
+    backgroundColor: "#0b0f13",
+    flex: 1,
+    position: "relative",
+  },
+  inputStyle: {
+    borderWidth: 2,
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    fontSize: 20,
+    marginBottom: 15,
+    color: "#fff",
+    backgroundColor: "#14191f",
+    borderRadius: 20,
+    borderColor: "#32373e",
+    borderWidth: 1,
+  },
+  btn: {
+    backgroundColor: "#214ED0",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+  },
+  deletebtn: {
+    backgroundColor: "#640716",
+    padding: 20,
+    borderRadius: 20,
+    alignItems: "center",
+  },
+  closeBtn: {
+    padding: 20,
+    alignItems: "center",
+  },
+  modalheader: {
+    marginBottom: 40,
+    alignItems: "center",
+    textAlign: "center",
   },
 });
 

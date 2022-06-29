@@ -219,6 +219,7 @@ const Note = ({ route, navigation }) => {
           <FlatList
             style={styles.flatListStyle}
             data={data1}
+            contentContainerStyle={{ paddingBottom: 120 }}
             renderItem={(e) => {
               return (
                 <NoteContent
@@ -233,12 +234,13 @@ const Note = ({ route, navigation }) => {
               );
             }}
             keyExtractor={(item) => {
-              item.id;
+              "Even" + item.index;
             }}
             showsHorizontalScrollIndicator={false}
           />
           <FlatList
             style={styles.flatListStyle}
+            contentContainerStyle={{ paddingBottom: 120 }}
             data={data2}
             renderItem={(e) => {
               return (
@@ -254,7 +256,7 @@ const Note = ({ route, navigation }) => {
               );
             }}
             keyExtractor={(item) => {
-              item.id;
+              "Odd" + item.index;
             }}
             showsHorizontalScrollIndicator={false}
           />
@@ -359,6 +361,7 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     paddingTop: 20,
+    paddingBottom: 40,
     flex: 1,
     backgroundColor: "#0b0f13",
   },
@@ -431,8 +434,6 @@ const styles = StyleSheet.create({
   },
   flatListStyle: {
     marginTop: 20,
-    width: "100%",
-    paddingBottom: 120,
   },
   emptyText: {
     flex: 1,
