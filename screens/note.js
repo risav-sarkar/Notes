@@ -47,14 +47,12 @@ const Note = ({ route, navigation }) => {
     if (noteData) {
       let temp = data.filter((e) => e.id === noteData.id);
       temp[0].uid = noteData.uid;
-      console.log(temp[0]);
       setNoteData(temp[0]);
     }
   }, [data]);
 
   useEffect(() => {
     if (noteData.notes) {
-      console.log("Data Filtered");
       let arr1 = [],
         arr2 = [];
       for (let i = 0; i < noteData.notes.length; i++) {

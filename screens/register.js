@@ -58,7 +58,18 @@ const Register = ({ navigation }) => {
         });
       })
       .catch((error) => {
-        console.log(error);
+        if (
+          error.message ===
+          "Firebase: Password should be at least 6 characters (auth/weak-password)."
+        )
+          SetAlert("Password Should Be Atleast 6 Character!");
+        else if (error.message === "Firebase: Error (auth/invalid-email).")
+          SetAlert("Invalid Email!");
+        else if (
+          error.message === "Firebase: Error (auth/email-already-in-use)."
+        )
+          SetAlert("Email Already Exists!");
+        else SetAlert(error.message);
       });
   };
 

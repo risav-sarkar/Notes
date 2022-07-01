@@ -25,7 +25,7 @@ import { faArrowRightFromBracket } from "@fortawesome/free-solid-svg-icons/faArr
 import { useUserFetch } from "../hooks/useUserFetch";
 import { useState } from "react";
 
-const Profile = () => {
+const Profile = ({ navigation }) => {
   const { user } = useUserFetch();
 
   const auth = getAuth();
@@ -33,6 +33,7 @@ const Profile = () => {
   const [modal, setModal] = useState(false);
   const [inputField, setInputField] = useState("");
   const [type, setType] = useState(null);
+  const [alertMessage, setAlertMessage] = useState([]);
 
   const HandleSignOut = () => {
     signOut(auth).catch((error) => {
@@ -41,24 +42,33 @@ const Profile = () => {
   };
 
   const HandleSubmit = () => {
+    if (!inputField) {
+      SetAlert("Input Can Not Be Empty!", 1);
+      return;
+    }
+
     if (type === 1) {
       updateEmail(auth.currentUser, inputField)
         .then(() => {
-          setInputField("");
-          setModal(false);
+          SetAlert("Email Changed Successfully!", 0);
         })
         .catch((error) => {
-          console.log(error);
+          if (error.message === "Firebase: Error (auth/invalid-email).")
+            SetAlert("Invalid Email", 1);
+          else SetAlert(error.message, 1);
         });
     } else if (type === 2) {
-      console.log("Pass");
       updatePassword(user, inputField)
         .then(() => {
-          setInputField("");
-          setModal(false);
+          SetAlert("Password Changed Successfully!", 0);
         })
         .catch((error) => {
-          console.log(error);
+          if (
+            error.message ===
+            "Firebase: Password should be at least 6 characters (auth/weak-password)."
+          )
+            SetAlert("Password Should Be Atleast 6 Character!", 1);
+          else SetAlert(error.message, 1);
         });
     } else {
       deleteUser(user)
@@ -66,9 +76,17 @@ const Profile = () => {
           setModal(false);
         })
         .catch((error) => {
-          console.log(error);
+          SetAlert(error.message, 1);
         });
     }
+  };
+
+  const SetAlert = (name, type) => {
+    setAlertMessage([name, type]);
+    const timer = setTimeout(() => {
+      setAlertMessage([]);
+    }, 5000);
+    return () => clearTimeout(timer);
   };
 
   return (
@@ -214,6 +232,28 @@ const Profile = () => {
               ) : null}
             </View>
 
+            {alertMessage.length ? (
+              <View
+                style={[
+                  styles.alertBox,
+                  {
+                    backgroundColor:
+                      alertMessage[1] === 1 ? "#3d1515" : "#1a2b20",
+                  },
+                ]}
+              >
+                <Text
+                  style={{
+                    color: alertMessage[1] === 1 ? "#ed6d65" : "#65d372",
+                    fontSize: 18,
+                    textAlign: "center",
+                  }}
+                >
+                  {alertMessage[0]}
+                </Text>
+              </View>
+            ) : null}
+
             <TouchableOpacity
               onPress={() => {
                 HandleSubmit();
@@ -324,6 +364,12 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     alignItems: "center",
     textAlign: "center",
+  },
+  alertBox: {
+    marginBottom: 15,
+    padding: 15,
+    borderRadius: 20,
+    alignItems: "center",
   },
 });
 

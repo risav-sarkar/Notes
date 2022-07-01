@@ -41,20 +41,17 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((res) => {
-        console.log(res.user);
-      })
-      .catch((error) => {
-        console.log(error.message);
-        if (error.message === "Firebase: Error (auth/invalid-email).") {
-          SetAlert("Please Enter Valid Email!");
-        } else if (error.message === "Firebase: Error (auth/wrong-password).") {
-          SetAlert("Password Is Wrong!");
-        } else if (error.message === "Firebase: Error (auth/user-not-found).") {
-          SetAlert("User Not Found!");
-        }
-      });
+    signInWithEmailAndPassword(auth, email, password).catch((error) => {
+      if (error.message === "Firebase: Error (auth/invalid-email).") {
+        SetAlert("Please Enter Valid Email!");
+      } else if (error.message === "Firebase: Error (auth/wrong-password).") {
+        SetAlert("Password Is Wrong!");
+      } else if (error.message === "Firebase: Error (auth/user-not-found).") {
+        SetAlert("User Not Found!");
+      } else {
+        SetAlert(error.message);
+      }
+    });
   };
 
   const HandleGoogleLogin = () => {

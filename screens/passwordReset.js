@@ -37,12 +37,11 @@ const PasswordReset = ({ navigation }) => {
         setAlertMessage("");
       })
       .catch((error) => {
-        console.log(error.message);
         if (error.message === "Firebase: Error (auth/user-not-found).") {
           SetAlert("User Not Found!");
         } else if (error.message === "Firebase: Error (auth/invalid-email).") {
           SetAlert("Please Enter Valid Email!");
-        }
+        } else SetAlert(error.message);
       });
   };
 
