@@ -91,6 +91,7 @@ const Login = ({ navigation }) => {
             value={password}
             onChangeText={setPassword}
             placeholderTextColor={"#aaaaaa"}
+            secureTextEntry={true}
           />
 
           {alertMessage ? (

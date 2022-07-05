@@ -4,7 +4,7 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  FlatList,
+  Image,
   Modal,
 } from "react-native";
 
@@ -92,6 +92,13 @@ const Profile = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <Image style={styles.img} source={require("../assets/logo.png")} />
+        <Text style={{ color: "#fff", fontSize: 40, marginLeft: 20 }}>
+          Notes
+        </Text>
+      </View>
+
+      <View style={styles.subHeader}>
         <View style={styles.textContent}>
           <Text style={{ color: "#fff", fontSize: 28, marginBottom: 15 }}>
             {user ? user.displayName : ""}
@@ -132,6 +139,7 @@ const Profile = ({ navigation }) => {
           onPress={() => {
             setModal(true);
             setType(1);
+            setAlertMessage([]);
           }}
         >
           <FontAwesomeIcon size={20} icon={faEnvelope} color={"#fff"} />
@@ -145,6 +153,7 @@ const Profile = ({ navigation }) => {
           onPress={() => {
             setModal(true);
             setType(2);
+            setAlertMessage([]);
           }}
         >
           <FontAwesomeIcon size={20} icon={faLock} color={"#fff"} />
@@ -164,6 +173,7 @@ const Profile = ({ navigation }) => {
           onPress={() => {
             setModal(true);
             setType(3);
+            setAlertMessage([]);
           }}
         >
           <FontAwesomeIcon
@@ -290,13 +300,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0b0f13",
     padding: 20,
-    marginTop: 40,
   },
-  header: {
+  subHeader: {
     borderRadius: 15,
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  header: {
+    paddingTop: 20,
+    paddingBottom: 30,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  img: { height: 60, width: 60 },
   textContent: {
     padding: 20,
     borderColor: "#32373e",

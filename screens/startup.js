@@ -13,6 +13,7 @@ const StartUp = ({ navigation }) => {
       <StatusBar animated={false} backgroundColor="#0b0f13" />
 
       <View style={styles.startupScreen}>
+        <Image style={styles.img} source={require("../assets/logo.png")} />
         <Text style={styles.mainHeader}>Notes</Text>
         <Text style={styles.subHeader}>
           Take notes or remainders, into folders and keep them well organized!
@@ -56,6 +57,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     alignItems: "center",
   },
+  img: { height: 120, width: 120, marginBottom: 20 },
 });
 
 export default StartUp;

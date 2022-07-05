@@ -57,7 +57,7 @@ export default function App() {
           animation: "fade_from_bottom",
         }}
       >
-        {user == "loading" ? (
+        {user === "loading" ? (
           <Stack.Screen name="SplashScreen" component={SplashScreen} />
         ) : user === null ? (
           <>
