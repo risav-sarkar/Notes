@@ -4,7 +4,7 @@
 
 ## ✨ Description
 
-A nifty notes app. The notes are arranged inside folders. The app is connected to Firebase Firestore Database for storing data and it has a user login, which is using Firebase Authentication.
+A nifty notes app built using React Native. The notes are arranged inside folders. The app is connected to Firebase Firestore Database for storing data and it has a user login, which is using Firebase Authentication.
 
 Features of this app
 
